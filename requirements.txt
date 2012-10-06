@@ -1,1 +1,3 @@
 django
+south
+mysql-python
