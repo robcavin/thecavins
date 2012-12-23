@@ -1,0 +1,26 @@
+{% extends 'thecavins/base_thecavins.html' %}
+{% load url from future %}
+
+{% block content %}
+    {% for post_dict in posts_to_display %}
+     {% with post_dict.post as post %}
+     <div class="row">
+        <div class="span12"><img class="post_image" src="{{ post.cropped_image.url }}"/></div>
+     </div>
+     <div class="row">
+       <div class="span1"></div>
+       <div class="span1"><img class="profile_image" src="{{ post.created_by.get_profile.cropped_image.url }}"/></div>
+       <div class="span10"><p>{{ post.description }}</p></div>
+     </div>
+        
+       {% for comment in post_dict.comments %}
+        <div class="row">
+          <hr style="margin-top:5px;margin-bottom:10px">
+          <div class="span1"></div>
+          <div class="span1"><img class="profile_image" src="{{ comment.created_by.get_profile.cropped_image.url }}"/></div>
+          <div class="span10"><p>{{ comment.description }}</p></div>
+        </div>
+        {% endfor %}
+     {% endwith %}
+    {% endfor %}           
+{% endblock %}

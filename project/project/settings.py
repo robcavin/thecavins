@@ -163,3 +163,5 @@ LOGGING = {
         },
     }
 }
+
+AUTH_PROFILE_MODULE = 'thecavins.UserProfile'

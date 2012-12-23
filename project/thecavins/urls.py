@@ -4,6 +4,7 @@ from django.conf import settings
 urlpatterns = patterns('',
     # Examples:
     url(r'^$','thecavins.views.homepage'),
+    url(r'^stream/(?P<path>.*?)/?$','thecavins.views.stream')
 )
 
 if settings.DEBUG:
