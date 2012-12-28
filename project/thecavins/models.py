@@ -2,51 +2,55 @@ from django.db import models
 from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save
 
+class Image(models.Model) :
+
+    original = models.ImageField(upload_to='images',height_field='height',width_field='width')
+    width = models.IntegerField(editable=False)
+    height = models.IntegerField(editable=False)
+
+    cropped = models.ImageField(upload_to='images',null=True, blank=True, height_field='cropped_height',width_field='cropped_width')
+    cropped_width = models.IntegerField(editable=False, null=True)
+    cropped_height = models.IntegerField(editable=False, null=True)
+
+    created_by = models.ForeignKey(User)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return self.original.name # just setting this to role for now since description has been removed
+
 # Create your models here.
 class Stream(models.Model) :
     group = models.ForeignKey(Group)
-
+    name = models.CharField(max_length=64)
+    
+    def __unicode__(self):
+        return self.name
  
 class Post(models.Model) :
-
     stream = models.ForeignKey(Stream)
-    
-    source_image = models.ImageField(upload_to='images',height_field='source_image_height',width_field='source_image_width', null=True)
-    source_image_width = models.IntegerField(editable=False, null = True)
-    source_image_height = models.IntegerField(editable=False, null = True)
-
-    cropped_image = models.ImageField(upload_to='images',height_field='cropped_image_height',width_field='cropped_image_width', null=True)
-    cropped_image_width = models.IntegerField(editable=False, null=True)
-    cropped_image_height = models.IntegerField(editable=False, null=True)
-
+    images = models.ManyToManyField(Image, related_name='posts')
     description = models.CharField(max_length=512,blank=True)
-    
     created_by = models.ForeignKey(User)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
-class Comment(models.Model) :
-    
-    post = models.ForeignKey(Post)
-    
-    description = models.CharField(max_length=512,blank=True)
+    def __unicode__(self):
+        return self.stream.name +' - '+ self.created_by.username +' - '+ self.description[0:32]
         
+class Comment(models.Model) :
+    post = models.ForeignKey(Post)
+    description = models.CharField(max_length=512,blank=True)    
     created_by = models.ForeignKey(User)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __unicode__(self):
+        str(self.post) +'-'+ self.created_by.username +'-'+ self.description
 
 class UserProfile(models.Model) :
-    user = models.OneToOneField(User)
-    
-    source_image = models.ImageField(upload_to='images',height_field='source_image_height',width_field='source_image_width', null=True)
-    source_image_width = models.IntegerField(editable=False, null=True)
-    source_image_height = models.IntegerField(editable=False, null=True)
-
-    cropped_image = models.ImageField(upload_to='images',height_field='cropped_image_height',width_field='cropped_image_width', null=True)
-    cropped_image_width = models.IntegerField(editable=False, null=True)
-    cropped_image_height = models.IntegerField(editable=False, null=True)
+    user = models.OneToOneField(User)    
+    image = models.ForeignKey(Image)
     
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

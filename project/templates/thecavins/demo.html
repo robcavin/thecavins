@@ -1,6 +1,10 @@
 {% extends 'thecavins/base_thecavins.html' %}
 {% load url from future %}
 
+{% block extrahead %}
+     <link type="text/css" href="{{ STATIC_URL }}jcrop/jquery.Jcrop.css" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
     {% for post_dict in posts_to_display %}
      {% with post_dict.post as post %}
@@ -22,5 +26,17 @@
         </div>
         {% endfor %}
      {% endwith %}
-    {% endfor %}           
+    {% endfor %}
+    
+    <button type="button" class="btn" onclick="add_image('thumbnail_img','logo',200,200,$('#preview_image_thumbnail___asdf__').get(0))"><i class="icon-picture"></i> Add Image</button>
+    
+{% endblock %}
+
+{% block dialogs %}
+{% include 'thecavins/image_add_dialog.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{STATIC_URL}}jcrop/jquery.Jcrop.min.js"></script>
+<script src="{{STATIC_URL}}thecavins/js/image_add_dialog.js"></script>
 {% endblock %}

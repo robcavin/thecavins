@@ -1,0 +1,12 @@
+.profile_image {
+    max-height:60px;
+    max-width:60px;
+}
+.post_image {
+    max-height:400px;
+    margin:10px 0px 10px 100px;
+}
+
+.jcrop-fix img {
+    max-width:none;        
+}

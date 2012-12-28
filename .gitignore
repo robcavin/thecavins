@@ -1,1 +1,7 @@
 *.pyc
+project/public/media/
+bin/
+local/
+lib/
+include/
+*.komodoproject

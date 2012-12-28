@@ -1,0 +1,22 @@
+{% extends "thecavins/base_thecavins.html" %}
+{% load url from future %}
+
+{% block extrahead %}
+    <!-- Registsration Page Href = {{ request.path }} -->
+    {{ block.super }}
+    <style>
+        label { display:inline;}
+        tr { text-align:left; }
+    </style>
+{% endblock %}
+  
+{% block content %}
+<div style='height:100%;text-align:center;width:100%;'>
+    <div style="margin:100px auto; padding:20px; background-color:#ffffff; display:inline-block; border:5px solid #aaaaaa;border-radius:5px">
+
+        {% block inner_content %}
+        {% endblock %}
+ 
+    </div>
+</div>
+{% endblock %}

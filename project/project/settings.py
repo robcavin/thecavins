@@ -1,4 +1,5 @@
 # Django settings for project project.
+from django.conf import global_settings
 
 # Get the current path
 import os.path
@@ -120,6 +121,10 @@ TEMPLATE_DIRS = (
     make_abs_path("../templates/"),
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = global_settings.TEMPLATE_CONTEXT_PROCESSORS + (
+  'django.core.context_processors.request',
+  )
+  
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -164,4 +169,13 @@ LOGGING = {
     }
 }
 
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'rob@bumblebeejuice.com'
+EMAIL_HOST_PASSWORD = 'nirvanastp'
+EMAIL_PORT = 587
+
 AUTH_PROFILE_MODULE = 'thecavins.UserProfile'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_URL = '/logout/'
