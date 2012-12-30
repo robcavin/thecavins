@@ -4,6 +4,10 @@ from django.conf import settings
 urlpatterns = patterns('',
     # Examples:
     url(r'^$','thecavins.views.homepage'),
+    
+    url(r'^stream/(?P<stream_id>\d+?)/post/?$','thecavins.views.post_to_stream'),
+    url(r'^post/(?P<post_id>.*?)/comment/?$','thecavins.views.comment_to_post'),
+
     url(r'^stream/(?P<path>.*?)/?$','thecavins.views.stream'),
     
     url(r'^image/upload/$','thecavins.views.image_upload'),

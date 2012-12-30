@@ -9,7 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
-
+from django.views.decorators.http import require_http_methods
+from django.core.urlresolvers import reverse
 
 def render_response (request, response_dict, template) :
 
@@ -53,8 +54,16 @@ def render_response (request, response_dict, template) :
 def homepage(request):
     return render(request, 'thecavins/homepage.html')
 
+class PostForm(forms.Form):
+    text = forms.CharField(label="",widget=forms.widgets.Textarea(attrs={'rows':4, 'class':'span10', 'placeholder':"Add a new post!" }))
+    image_ids = forms.CharField(widget=forms.widgets.HiddenInput, required=False)
+
+class CommentForm(forms.Form):
+    text = forms.CharField(label="",widget=forms.widgets.Textarea(attrs={'rows':2, 'class':'span7', 'placeholder':"Add a comment!" }))
+    
 @login_required    
 def stream(request,path) :
+    
     group = Group.objects.get(name='Cavins')
     stream = Stream.objects.get(group=group)
     
@@ -65,9 +74,54 @@ def stream(request,path) :
     for post in posts :
         comments = list(post.comment_set.order_by('created_at'))
         posts_to_display.append({'post':post,'comments':comments})
-        
-    return render(request, 'thecavins/demo.html', {'posts_to_display':posts_to_display})
+    
+    form = PostForm()
+    comment_form = CommentForm()
+    
+    return render(request, 'thecavins/demo.html', {'form':form, 'comment_form':comment_form,
+                                                   'stream_id': stream.id, 'posts_to_display':posts_to_display})
 
+@require_http_methods(["POST"])
+def post_to_stream(request,stream_id) :
+
+    stream = Stream.objects.get(pk=stream_id)
+
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid() :
+            
+            images = []
+            image_ids = [int(id) for id in form.cleaned_data['image_ids'].split(',') if id]
+            if image_ids : images = Image.objects.filter(pk__in=image_ids)
+            
+            post = Post()
+            post.description = form.cleaned_data['text']
+            post.created_by = request.user
+            post.stream = stream
+            post.save()
+
+            post.images = images
+            
+    return redirect('thecavins.views.stream', stream_id)
+
+
+@require_http_methods(["POST"])
+def comment_to_post(request,post_id) :
+
+    post = Post.objects.get(pk=post_id)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid() :
+            
+            comment = Comment()
+            comment.description = form.cleaned_data['text']
+            comment.created_by = request.user
+            comment.post = post
+            comment.save()
+            
+    return redirect(reverse('thecavins.views.stream', args=(post.stream_id,)) + '#post-' + str(post.id), post.stream.id)
+            
     
 # IMAGE HANDLING
 class ImageUploadForm(forms.Form):

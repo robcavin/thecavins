@@ -63,7 +63,7 @@
                 var results = "";
         // XXX this same code is replicated in the views for forms where images are used and thus will be needed to change in both locations
 		results += '<img class= "image_uploader_cropped_image" src="' + image['url'] + '">';
-		results += '<a href="#" class="image_uploader_remove_image deletelink" onclick="$(this.parentNode).remove();return false;">Remove</a>'
+		results += '<a href="#" class="image_uploader_remove_image deletelink" onclick="$(this.parentNode).remove();return false;"> (Remove)</a>'
 		results += '<input type="hidden" name="' + target_name + '" value="' + image['id'] + '">'
 		$(preview_target).html(results);
                 $("#image_selector_dialog").modal("hide");

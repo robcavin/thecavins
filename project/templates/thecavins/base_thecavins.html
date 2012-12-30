@@ -14,20 +14,6 @@
     <link type="text/css" href="{{ STATIC_URL }}thecavins/css/thecavins.css" rel="stylesheet">
     {% block extrahead %}
     {% endblock %}
-    <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-      .profile_image {
-        max-height:60px;
-        max-width:60px;
-      }
-      .post_image {
-        max-height:400px;
-        margin:10px 0px 10px 100px;
-      }
-    </style>
-    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -69,7 +55,7 @@
 
     <div class="container">
       <div class="row">
-        <div class="span12">
+        <div id="main_content_pane" class="span12">
           {% block content %}
           <h1>Bootstrap starter template</h1>
           <p>Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.</p>
@@ -79,6 +65,9 @@
       
     </div> <!-- /container -->
     
+    <div id="bg">
+      <img src="http://www.yosemitepark.com/Images/bg-main.jpg">
+    </div>
     {% block dialogs %}
     {% endblock %}
     

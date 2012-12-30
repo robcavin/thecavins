@@ -1,12 +1,74 @@
-.profile_image {
-    max-height:60px;
-    max-width:60px;
+html {
+    width:100%;
 }
+    
+body {
+    width:100%;
+    font-family: 'lucida grande',tahoma,verdana,arial,sans-serif;
+    color: #333;
+    
+    /*background-image:url('/static/assets/background-lightgrey-texture.jpg');
+    overflow-y:scroll;*/
+}
+
+.profile_image {
+    height:60px;
+    width:60px;
+}
+
+.comment {
+    line-height: 10px;
+}
+
+.comment p {
+    padding-left:5px;
+}
+
+.comment small {
+    color:#666666;
+}
+
+.comment .profile_image {
+    height:32px;
+    width:32px;   
+}
+
 .post_image {
-    max-height:400px;
-    margin:10px 0px 10px 100px;
+    border:1px solid #CCCCCC;
+    margin-bottom:10px;
+}
+
+.post {
+    font-size : 15px;
+}
+.post .comment {
+    font-size: 13px;
+    background-color:#FCFCFC;
+    padding:4px;
+    margin-top:1px;
 }
 
 .jcrop-fix img {
     max-width:none;        
+}
+
+#main_content_pane {
+    padding-top:60px;
+    background:#ffffff url(http://cdnimg.visualizeus.com/thumbs/88/1e/881ec95283a3f326818baa4a05ddbcff_m.jpg) repeat; /* url(http://4.bp.blogspot.com/-WoKxGUZRyMg/UJhpDFAdybI/AAAAAAAADBk/Yy9Nej-UsmI/s1600/seamless_white_paper_texture.jpg) repeat*/
+    border:2px solid #CCCCCC;
+    border-radius:5px;
+}
+
+#bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+#bg img {
+    width: 100%;
+    max-width: 100%;
 }

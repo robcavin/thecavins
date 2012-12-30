@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save
-
+from django.conf import settings
 class Image(models.Model) :
 
     original = models.ImageField(upload_to='images',height_field='height',width_field='width')
@@ -49,7 +49,8 @@ class Comment(models.Model) :
         str(self.post) +'-'+ self.created_by.username +'-'+ self.description
 
 class UserProfile(models.Model) :
-    user = models.OneToOneField(User)    
+    user = models.OneToOneField(User)
+    nickname = models.CharField(max_length=64)
     image = models.ForeignKey(Image)
     
 def create_user_profile(sender, instance, created, **kwargs):

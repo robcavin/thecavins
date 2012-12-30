@@ -6,29 +6,71 @@
 {% endblock %}
 
 {% block content %}
+
+      <div class="row">
+        <div class="span10 offset1">
+ 
+    <form action="{% url 'thecavins.views.post_to_stream' stream_id %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div id="preview_image"></div>
+    <button type="button" class="btn" onclick="add_image('image_ids','logo',600,400,$('#preview_image'))"><i class="icon-picture"></i> Add Image</button>
+    <input type="submit" class="btn btn-primary" value="Submit" />
+    </form>
+    
     {% for post_dict in posts_to_display %}
      {% with post_dict.post as post %}
-     <div class="row">
-        <div class="span12"><img class="post_image" src="{{ post.cropped_image.url }}"/></div>
-     </div>
-     <div class="row">
-       <div class="span1"></div>
-       <div class="span1"><img class="profile_image" src="{{ post.created_by.get_profile.cropped_image.url }}"/></div>
-       <div class="span10"><p>{{ post.description }}</p></div>
-     </div>
+      <hr id="post-{{ post.id }}">
+       <div class="post">
+      <div class="row">
+        <div class="span1"><img class="profile_image" src="{{ post.created_by.get_profile.image.cropped.url }}"/></div>
+        <div class="span9">
         
-       {% for comment in post_dict.comments %}
-        <div class="row">
-          <hr style="margin-top:5px;margin-bottom:10px">
-          <div class="span1"></div>
-          <div class="span1"><img class="profile_image" src="{{ comment.created_by.get_profile.cropped_image.url }}"/></div>
-          <div class="span10"><p>{{ comment.description }}</p></div>
+           <div class="row">
+            <p class="span9 text-info">{{ post.created_by.get_profile.nickname }}</p>
+           </div>
+           <div class="row">
+            <p class="span9">{{ post.description }}</p>
+           </div>
+           
+           <div class="row">
+            <div class="span9">
+            {% for image in post.images.all %}
+            <img class="post_image" src="{{ image.cropped.url }}"/>
+           {% endfor %}
+           </div>
+          </div>
+         
+          {% for comment in post_dict.comments %}
+           <div class="row">
+             <div class="span8 comment">
+                 <img class="pull-left profile_image" src="{{ comment.created_by.get_profile.image.cropped.url }}"/>
+                 <div class="pull-left">
+                 <p><span class="text-info">{{ comment.created_by.username }}</span> {{ comment.description }}</p>
+                 <p><small>{{ comment.created_at|date:"h:i A D, M d" }}</small></p>
+                 </div>
+             </div>
+             <div class="span1"></div>
+           </div>
+           {% endfor %}
+        
+          <div class="row">
+           <div class="span9">
+          <form action="{% url 'thecavins.views.comment_to_post' post.id %}" method="post">
+             {% csrf_token %}
+             {{ comment_form }}
+             <input type="submit" class="btn btn-primary" value="Submit" />
+           </form>
+           </div>
+          </div>
+           
+         </div> <!-- End of span 9 content column -->
+         <div class="span1"></div>
+
         </div>
-        {% endfor %}
+      </div>
      {% endwith %}
     {% endfor %}
-    
-    <button type="button" class="btn" onclick="add_image('thumbnail_img','logo',200,200,$('#preview_image_thumbnail___asdf__').get(0))"><i class="icon-picture"></i> Add Image</button>
     
 {% endblock %}
 
