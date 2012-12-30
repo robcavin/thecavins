@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 from django.http import HttpResponse
 from django.conf import settings
-from thecavins.models import Stream, Post, Comment, Image
+from thecavins.models import Stream, Post, Comment, Image, UserProfile
 from django.contrib.auth.models import User, Group
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
@@ -11,6 +11,7 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.core.urlresolvers import reverse
+from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 
 def render_response (request, response_dict, template) :
 
@@ -53,6 +54,24 @@ def render_response (request, response_dict, template) :
 @login_required
 def homepage(request):
     return render(request, 'thecavins/homepage.html')
+
+
+class myUserChangeForm(UserChangeForm):
+    class Meta:
+        model = User
+        fields = ['username','first_name','last_name','email']
+     
+class UserProfileForm(forms.ModelForm) :
+    class Meta:
+        model = UserProfile
+        fields = ["nickname"]
+
+@login_required
+def account(request):
+    form = myUserChangeForm(instance=request.user)
+    pass_form = PasswordChangeForm(request.user)
+    prof_form = UserProfileForm(instance=request.user.get_profile())
+    return render(request, 'thecavins/account.html', {'form':form,'pass_form':pass_form,'prof_form':prof_form})
 
 class PostForm(forms.Form):
     text = forms.CharField(label="",widget=forms.widgets.Textarea(attrs={'rows':4, 'class':'span10', 'placeholder':"Add a new post!" }))

@@ -47,7 +47,8 @@
             </ul>
           </div><!--/.nav-collapse -->
           {% if not request.user.is_anonymous %}
-          <div class="pull-right"><p class="navbar-text">{{ request.user.username }}<a href="/logout/"> (logout)</a></p></div>
+          <a class="btn pull-right" href="{% url 'thecavins.views.account' %}"><i class="icon-cog"></i></a>
+          <p class="navbar-text pull-right">{{ request.user.username }}</p>
           {% endif %}
         </div>
       </div>
@@ -66,7 +67,8 @@
     </div> <!-- /container -->
     
     <div id="bg">
-      <img src="http://www.yosemitepark.com/Images/bg-main.jpg">
+      <!--<img src="http://www.yosemitepark.com/Images/bg-main.jpg">-->
+      <img src="/media/background.jpg">
     </div>
     {% block dialogs %}
     {% endblock %}
