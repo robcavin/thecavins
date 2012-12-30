@@ -78,7 +78,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    make_abs_path("../public/static"),
+    make_abs_path("../public/static_local"),
 )
 
 # List of finder classes that know how to find static files in
