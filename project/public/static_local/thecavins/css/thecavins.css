@@ -75,7 +75,7 @@ form table td {
 
 #main_content_pane {
     padding-top:60px;
-    background:#ffffff url(http://cdnimg.visualizeus.com/thumbs/88/1e/881ec95283a3f326818baa4a05ddbcff_m.jpg) repeat; /* url(http://4.bp.blogspot.com/-WoKxGUZRyMg/UJhpDFAdybI/AAAAAAAADBk/Yy9Nej-UsmI/s1600/seamless_white_paper_texture.jpg) repeat*/
+    background:#ffffff url(/static/thecavins/images/paper.jpg) repeat; /* url(http://4.bp.blogspot.com/-WoKxGUZRyMg/UJhpDFAdybI/AAAAAAAADBk/Yy9Nej-UsmI/s1600/seamless_white_paper_texture.jpg) repeat*/
     border:2px solid #CCCCCC;
     border-radius:5px;
 }
