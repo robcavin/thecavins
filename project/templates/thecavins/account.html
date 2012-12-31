@@ -1,6 +1,10 @@
 {% extends 'thecavins/base_thecavins.html' %}
 {% load url from future %}
 
+{% block extrahead %}
+     <link type="text/css" href="{{ STATIC_URL }}jcrop/jquery.Jcrop.css" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <div style='height:100%;text-align:center;width:100%;'>
     <div style="margin:0px auto 50px auto; padding:20px; background-color:#ffffff; display:inline-block; border:5px solid #aaaaaa;border-radius:5px">
@@ -19,6 +23,7 @@
 <br>
 <button type="button" class="btn" onclick="add_image('image','logo',200,200,$('#preview_image'))"><i class="icon-picture"></i>Change Image</button>
 <input type="submit" class="btn btn-primary" value="Submit" />
+
 </form>
 
     </div>
