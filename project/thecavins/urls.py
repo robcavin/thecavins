@@ -3,7 +3,8 @@ from django.conf import settings
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^$','thecavins.views.homepage'),
+    url(r'^$', 'thecavins.views.root'),
+    url(r'^about/$','thecavins.views.about'),
     url(r'^account/$','thecavins.views.account'),
    
     url(r'^stream/(?P<stream_id>\d+?)/post/?$','thecavins.views.post_to_stream'),

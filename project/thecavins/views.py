@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
+from django.contrib import messages
 
 def render_response (request, response_dict, template) :
 
@@ -52,26 +53,72 @@ def render_response (request, response_dict, template) :
 #        return render_response(request,{'error' : form.errors },'/thecavins/login.html')
 
 @login_required
-def homepage(request):
-    return render(request, 'thecavins/homepage.html')
+def root(request) :
+    groups = request.user.groups.all()
+    if groups : group = groups[0]
+    else : group = Group.objects.get(name='Cavins')
+    return redirect('thecavins.views.stream', group.name)
+
+@login_required
+def about(request):
+    return render(request, 'thecavins/about.html')
 
 
 class myUserChangeForm(UserChangeForm):
     class Meta:
         model = User
-        fields = ['username','first_name','last_name','email']
-     
+        fields = ['username','first_name','last_name','email', 'password']
+    
+    username = forms.RegexField(
+        label="Username", max_length=30, regex=r"^\w[\w-]+$",
+        error_messages = {
+            'invalid': "This value may contain only letters, numbers and "
+                         "_ characters."})
+
+    password = forms.CharField(widget=forms.widgets.HiddenInput, required=False)
+
 class UserProfileForm(forms.ModelForm) :
+    image_id = forms.CharField(widget=forms.widgets.HiddenInput, required=False)
+    image = forms.ModelChoiceField(queryset=Image.objects.all(),widget=forms.widgets.HiddenInput, required=False)
     class Meta:
         model = UserProfile
-        fields = ["nickname"]
+        fields = ["nickname", "image", "image_id"]
 
 @login_required
 def account(request):
-    form = myUserChangeForm(instance=request.user)
-    pass_form = PasswordChangeForm(request.user)
-    prof_form = UserProfileForm(instance=request.user.get_profile())
+ 
+    if request.method == 'POST':
+        form = myUserChangeForm(request.POST,instance=request.user)
+        pass_form = PasswordChangeForm(request.user,request.POST)
+        prof_form = UserProfileForm(request.POST,instance=request.user.get_profile())
+        
+        if form.is_valid() and prof_form.is_valid() :
+            form.save()             
+            
+            if prof_form.cleaned_data['image_id'] :
+                prof_form.image = Image.objects.get(pk=prof_form.cleaned_data['image_id'])
+           
+            prof_form.save()
+
+            messages.add_message(request, messages.SUCCESS, 'User information updated.')
+            
+        if pass_form.is_valid() :
+            pass_form.save()
+            messages.add_message(request, messages.SUCCESS, 'Password changed successfully.')
+        
+        else :
+            if (not request.POST['old_password'] and
+                not request.POST['new_password1'] and
+                not request.POST['new_password2']) :
+                pass_form = PasswordChangeForm(request.user)
+    else :
+        form = myUserChangeForm(instance=request.user)
+        pass_form = PasswordChangeForm(request.user)
+        prof_form = UserProfileForm(instance=request.user.get_profile())
+        
     return render(request, 'thecavins/account.html', {'form':form,'pass_form':pass_form,'prof_form':prof_form})
+
+
 
 class PostForm(forms.Form):
     text = forms.CharField(label="",widget=forms.widgets.Textarea(attrs={'rows':4, 'class':'span10', 'placeholder':"Add a new post!" }))
@@ -97,7 +144,7 @@ def stream(request,path) :
     form = PostForm()
     comment_form = CommentForm()
     
-    return render(request, 'thecavins/demo.html', {'form':form, 'comment_form':comment_form,
+    return render(request, 'thecavins/stream.html', {'form':form, 'comment_form':comment_form,
                                                    'stream_id': stream.id, 'posts_to_display':posts_to_display})
 
 @require_http_methods(["POST"])

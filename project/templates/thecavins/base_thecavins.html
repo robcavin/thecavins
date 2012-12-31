@@ -42,8 +42,8 @@
           <a class="brand span3" style="font-size:28px" href="#">&nbsp;The Cavins</a>
           <div class="nav-collapse">
             <ul class="nav">
-              <li lass="active"><a href="/">Home</a></li>
-              <li><a href="/stream/cavin">Demo</a></li>
+              <li class="active"><a href="/stream/cavin">Stream</a></li>
+              <li><a href="/about/">About</a></li>
             </ul>
           </div><!--/.nav-collapse -->
           {% if not request.user.is_anonymous %}
@@ -57,6 +57,18 @@
     <div class="container">
       <div class="row">
         <div id="main_content_pane" class="span12">
+          {% if messages %}
+          <div class="row">
+          <ul class="messages span10 offset1">
+              {% for message in messages %}
+              <li{% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+              </li>
+              {% endfor %}
+          </ul>            
+          </div>
+          {% endif %}
           {% block content %}
           <h1>Bootstrap starter template</h1>
           <p>Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.</p>
