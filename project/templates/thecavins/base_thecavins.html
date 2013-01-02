@@ -42,8 +42,8 @@
           <a class="brand span3" style="font-size:28px" href="#">&nbsp;The Cavins</a>
           <div class="nav-collapse">
             <ul class="nav">
-              <li class="active"><a href="/stream/cavin">Stream</a></li>
-              <li><a href="/about/">About</a></li>
+              <li {% ifequal active_page "stream" %}class="active"{% endifequal %}><a href="/stream/cavin">Stream</a></li>
+              <li {% ifequal active_page "about" %}class="active"{% endifequal %}><a href="/about/">About</a></li>
             </ul>
           </div><!--/.nav-collapse -->
           {% if not request.user.is_anonymous %}

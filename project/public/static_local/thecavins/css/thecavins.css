@@ -61,10 +61,13 @@ body {
     margin-top:1px;
 }
 
+.image_uploader_cropped_image {
+    margin-bottom:10px;
+}
+
 .jcrop-fix img {
     max-width:none;        
 }
-
 
 form table th {
     text-align:right;

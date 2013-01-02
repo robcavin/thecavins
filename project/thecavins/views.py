@@ -62,7 +62,7 @@ def root(request) :
 
 @login_required
 def about(request):
-    return render(request, 'thecavins/about.html')
+    return render(request, 'thecavins/about.html', {'active_page':'about'} )
 
 
 class myUserChangeForm(UserChangeForm):
@@ -145,7 +145,7 @@ def stream(request,path) :
     form = PostForm()
     comment_form = CommentForm()
     
-    return render(request, 'thecavins/stream.html', {'form':form, 'comment_form':comment_form,
+    return render(request, 'thecavins/stream.html', {'form':form, 'comment_form':comment_form, 'active_page':'stream',
                                                    'stream_id': stream.id, 'posts_to_display':posts_to_display})
 
 @require_http_methods(["POST"])
