@@ -13,6 +13,7 @@ from django.views.decorators.http import require_http_methods
 from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib import messages
+from django.core.mail import EmailMultiAlternatives
 
 def render_response (request, response_dict, template) :
 
@@ -121,7 +122,7 @@ def account(request):
 
 
 class PostForm(forms.Form):
-    text = forms.CharField(label="",widget=forms.widgets.Textarea(attrs={'rows':4, 'class':'span10', 'placeholder':"Add a new post!" }))
+    text = forms.CharField(label="",widget=forms.widgets.Textarea(attrs={'rows':4, 'class':'span10', 'placeholder':"Add a new post!" }), required=False)
     image_ids = forms.CharField(widget=forms.widgets.HiddenInput, required=False)
 
 class CommentForm(forms.Form):
@@ -160,13 +161,39 @@ def post_to_stream(request,stream_id) :
             image_ids = [int(id) for id in form.cleaned_data['image_ids'].split(',') if id]
             if image_ids : images = Image.objects.filter(pk__in=image_ids)
             
-            post = Post()
-            post.description = form.cleaned_data['text']
-            post.created_by = request.user
-            post.stream = stream
-            post.save()
+            #Make sure there is text OR an image.  Doesn't need to be both
+            if form.cleaned_data['text'] or len(images) : 
+                post = Post()
+                post.description = form.cleaned_data['text'] or 'posted an image.'
+                post.created_by = request.user
+                post.stream = stream
+                post.save()
+    
+                post.images = images
+                
+                # Send an email alerting of a post
+                image_section = ""
+                for image in post.images.all() :
+                    image_section += '<br><img src="' + image.cropped.url +'">'
+                                
+                text_content = (
+                          ">-------------------Reply above this line----------------------\n"+
+                          post.description
+                          )
 
-            post.images = images
+                html_content = (
+                          ">-------------------Reply above this line----------------------<br>"+
+                          post.description + '<br>' +
+                          image_section
+                          )
+
+                subject = request.user.get_profile().nickname + ' posted to TheCavins.com'
+                from_email='TheCavins@thecavins.com'
+                recipient_list=[user.email for user in User.objects.filter(groups=stream.group) if user.email]
+                
+                msg = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
+                msg.attach_alternative(html_content, "text/html")
+                msg.send(fail_silently=True)
             
     return redirect('thecavins.views.stream', stream_id)
 
@@ -185,6 +212,31 @@ def comment_to_post(request,post_id) :
             comment.created_by = request.user
             comment.post = post
             comment.save()
+            
+            # Send an email alerting of a post
+            poster = comment.post.created_by.get_profile().nickname
+            text_content = (
+                      ">-------------------Reply above this line----------------------\n\n"+
+                      comment.description + '\n',
+                      '\nOriginal Post by ' + poster + ' : ' + comment.post.description
+                      )
+
+            html_content = (
+                      ">-------------------Reply above this line----------------------<br><br>"+
+                      comment.description + '<br>' +
+                      '<br> Original Post by ' + poster + ' : ' + comment.post.description
+                      )
+
+            subject = (
+                request.user.get_profile().nickname + ' commented on ' +
+                poster + "'s Post on TheCavins.com"
+                )
+            from_email='TheCavins@thecavins.com'
+            recipient_list=[user.email for user in User.objects.filter(groups=post.stream.group) if user.email]
+            
+            msg = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send(fail_silently=True)
             
     return redirect(reverse('thecavins.views.stream', args=(post.stream_id,)) + '#post-' + str(post.id), post.stream.id)
             

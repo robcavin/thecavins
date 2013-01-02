@@ -169,13 +169,19 @@ LOGGING = {
     }
 }
 
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'rob@bumblebeejuice.com'
-EMAIL_HOST_PASSWORD = 'nirvanastp'
-EMAIL_PORT = 587
+EMAIL_USE_TLS = False
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_USER = ''
+EMAIL_PORT = 25
 
 AUTH_PROFILE_MODULE = 'thecavins.UserProfile'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_URL = '/logout/'
+
+
+# Check which environment to load
+if os.path.exists(make_abs_path("PRODUCTION")):
+  from settings_prod import *
+  ENVIRONMENT = "PRODUCTION"
