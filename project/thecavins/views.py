@@ -189,7 +189,7 @@ def post_to_stream(request,stream_id) :
 
                 subject = request.user.get_profile().nickname + ' posted to TheCavins.com'
                 from_email='TheCavins@thecavins.com'
-                recipient_list=[user.email for user in User.objects.filter(groups=stream.group) if user.email]
+                recipient_list=[user.email for user in User.objects.filter(groups=stream.group).exclude(pk=request.user.pk) if user.email]
                 
                 msg = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
                 msg.attach_alternative(html_content, "text/html")
@@ -232,7 +232,8 @@ def comment_to_post(request,post_id) :
                 poster + "'s Post on TheCavins.com"
                 )
             from_email='TheCavins@thecavins.com'
-            recipient_list=[user.email for user in User.objects.filter(groups=post.stream.group) if user.email]
+            
+            recipient_list=[user.email for user in User.objects.filter(groups=post.stream.group).exclude(pk=request.user.pk) if user.email]
             
             msg = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
             msg.attach_alternative(html_content, "text/html")

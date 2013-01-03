@@ -45,7 +45,7 @@
            <div class="row">
              <div class="span8 comment">
                  <img class="pull-left profile_image" src="{{ comment.created_by.get_profile.image.cropped.url }}"/>
-                 <div class="pull-left">
+                 <div style="overflow:hidden">
                  <p><span class="text-info">{{ comment.created_by.username }}</span> {{ comment.description }}</p>
                  <p><small>{{ comment.created_at|date:"h:i A D, M d" }}</small></p>
                  </div>

@@ -30,10 +30,12 @@ body {
 }
 
 .comment {
-    line-height: 10px;
+    overflow:hidden;
 }
 
 .comment p {
+    line-height:16px;
+    margin-bottom:5px;
     padding-left:5px;
 }
 
