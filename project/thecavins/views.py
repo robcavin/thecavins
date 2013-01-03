@@ -172,19 +172,18 @@ def post_to_stream(request,stream_id) :
                 post.images = images
                 
                 # Send an email alerting of a post
+                target_url = request.build_absolute_uri(reverse('thecavins.views.stream', args=(stream.id,)) + '#post-' + str(post.id))
+
                 image_section = ""
                 for image in post.images.all() :
                     image_section += '<br><img src="' + image.cropped.url +'">'
                                 
-                text_content = (
-                          ">-------------------Reply above this line----------------------\n"+
-                          post.description
-                          )
-
+                text_content = ("Please tell me if you see this.")
                 html_content = (
-                          ">-------------------Reply above this line----------------------<br>"+
-                          post.description + '<br>' +
-                          image_section
+                          "---- Reply above this line ----<br><br>"+
+                          post.description + '<br><br>' +
+                          image_section + '<br>' +
+                          'Link to this post : ' + target_url
                           )
 
                 subject = request.user.get_profile().nickname + ' posted to TheCavins.com'
@@ -195,14 +194,15 @@ def post_to_stream(request,stream_id) :
                 msg.attach_alternative(html_content, "text/html")
                 msg.send(fail_silently=True)
             
-    return redirect('thecavins.views.stream', stream_id)
+    return redirect('thecavins.views.stream', stream.id)
 
 
 @require_http_methods(["POST"])
 def comment_to_post(request,post_id) :
 
     post = Post.objects.get(pk=post_id)
-
+    target_url = request.build_absolute_uri(reverse('thecavins.views.stream', args=(post.stream.id,)) + '#post-' + str(post.id))
+    
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid() :
@@ -217,16 +217,13 @@ def comment_to_post(request,post_id) :
             
             # Send an email alerting of a post
             poster = comment.post.created_by.get_profile().nickname
-            text_content = (
-                      ">-------------------Reply above this line----------------------\n\n"+
-                      comment.description + '\n',
-                      '\nOriginal Post by ' + poster + ' : ' + comment.post.description
-                      )
+            text_content = ("Please tell me if you see this.")
 
             html_content = (
-                      ">-------------------Reply above this line----------------------<br><br>"+
+                      "---- Reply above this line ----<br><br>"+
                       comment.description + '<br>' +
-                      '<br> Original Post by ' + poster + ' : ' + comment.post.description
+                      '<br> Original Post by ' + poster + ' : ' + comment.post.description + '<br><br>' +
+                      'Link to this post : ' + target_url
                       )
 
             subject = (
@@ -241,7 +238,7 @@ def comment_to_post(request,post_id) :
             msg.attach_alternative(html_content, "text/html")
             msg.send(fail_silently=True)
             
-    return redirect(reverse('thecavins.views.stream', args=(post.stream_id,)) + '#post-' + str(post.id), post.stream.id)
+    return redirect(target_url)
             
     
 # IMAGE HANDLING
