@@ -136,7 +136,7 @@ def stream(request,path) :
     
     posts_to_display = []
     
-    posts = list(stream.post_set.order_by('-updated_at'))
+    posts = list(stream.post_set.order_by('-updated_at')[:20])
        
     for post in posts :
         comments = list(post.comment_set.order_by('created_at'))
@@ -212,6 +212,8 @@ def comment_to_post(request,post_id) :
             comment.created_by = request.user
             comment.post = post
             comment.save()
+            
+            post.save()  # Update the 'updated_at' field
             
             # Send an email alerting of a post
             poster = comment.post.created_by.get_profile().nickname
