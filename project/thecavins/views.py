@@ -6,52 +6,73 @@ from django.conf import settings
 from thecavins.models import Stream, Post, Comment, Image, UserProfile
 from django.contrib.auth.models import User, Group
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate
-from django.contrib.auth import login as auth_login
+#from django.contrib.auth import authenticate
+#from django.contrib.auth import login as auth_login
+from django.contrib.auth.views import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
+from django.template.response import TemplateResponse
+import json
 
-def render_response (request, response_dict, template) :
 
+# XXX - This is sloppy recursion.  Needs better thought
+#def objify_data_w_models(data,verbose) :
+#    if isinstance(data,dict) :
+#        return_dict = {}
+#        for (key, value) in data.iteritems() :
+#            if isinstance(value,Model) :
+#                return_dict.update({key:value.to_dict(verbose)})
+#            else :
+#                return_dict.update({key:objify_data_w_models(value)})
+#
+#        return return_dict
+#    
+#    elif isinstance(data,list) :
+#        return_array = []
+#        
+#        for value in data :
+#            if isinstance(value,Model) :
+#                return_array.append(value.to_dict(verbose))
+#            else :
+#                return_array.append(objify_data_w_models(value))
+#    
+#    elif isinstance(data,Model) :
+#        return data.to_dict(verbose)
+#    
+#    else :
+#        return data
+
+
+def render_api_or_html_response (request, template_name, data, context) :
     accepted_types = None
 
-    if 'HTTP_ACCEPT' in request:
+    if 'HTTP_ACCEPT' in request.META:
         accepted_types = [a.split(';')[0] for a in request.META['HTTP_ACCEPT'].split(',')]        
 
     # Prefer JSON response
-    if 'application/json' in accepted_types :
-        return HTTPResponse(json.dumps(response_dict))
+    if accepted_types and 'application/json' in accepted_types :        
+        return HttpResponse(json.dumps(data))
     
     # Default to HTML response
     else :
-        return render(request,response_dict,template)
+        data.update(context)
+        return render(request,template_name, data)
     
 
-#class SigninForm(forms.Form):
-#    username = forms.CharField( label="Username", max_length=90)
-#    password = forms.CharField( widget=forms.PasswordInput, label="Your Password" )
-#    
-#def login(request):
-#    if request.method == 'POST':
-#        form = SigninForm(request.POST)
-#        if form.is_valid():
-#            username = form.cleaned_data['username']
-#            password = form.cleaned_data['password']
-#            
-#            user = authenticate(username=username,password=password)
-#            if user is not None:
-#                if user.is_active:
-#                    auth_login(request, user)
-#                    return render_response(request,{'user' : user},'/thecavins/login.html')
-#                else:
-#                    # Return a 'disabled account' error message
-#                    return render_response(request,{'error' : 'Account disabled'},'/thecavins/login.html')
-#    else:
-#        return render_response(request,{'error' : form.errors },'/thecavins/login.html')
+# Because login is a potential API endpoint, capture the results of the auth login and render appropriately
+def login(request):
+    response = auth_login(request)
+    if isinstance(response,TemplateResponse) :
+        return render_api_or_html_response(request,
+                                           response.template_name,
+                                           {'login_required':True},
+                                           response.context_data)
+    
+    else : return response
 
 @login_required
 def root(request) :
@@ -60,12 +81,14 @@ def root(request) :
     else : group = Group.objects.get(name='Cavins')
     return redirect('thecavins.views.stream', group.name)
 
+
 @login_required
 def about(request):
     return render(request, 'thecavins/about.html', {'active_page':'about'} )
 
 
-class myUserChangeForm(UserChangeForm):
+
+class MyUserChangeForm(UserChangeForm):
     class Meta:
         model = User
         fields = ['username','first_name','last_name','email', 'password']
@@ -89,7 +112,7 @@ class UserProfileForm(forms.ModelForm) :
 def account(request):
  
     if request.method == 'POST':
-        form = myUserChangeForm(request.POST,instance=request.user)
+        form = MyUserChangeForm(request.POST,instance=request.user)
         pass_form = PasswordChangeForm(request.user,request.POST)
         prof_form = UserProfileForm(request.POST,instance=request.user.get_profile())
         
@@ -113,7 +136,7 @@ def account(request):
                 not request.POST['new_password2']) :
                 pass_form = PasswordChangeForm(request.user)
     else :
-        form = myUserChangeForm(instance=request.user)
+        form = MyUserChangeForm(instance=request.user)
         pass_form = PasswordChangeForm(request.user)
         prof_form = UserProfileForm(instance=request.user.get_profile())
         
@@ -140,13 +163,14 @@ def stream(request,path) :
        
     for post in posts :
         comments = list(post.comment_set.order_by('created_at'))
-        posts_to_display.append({'post':post,'comments':comments})
+        posts_to_display.append({'post':post.as_dict(),'comments':[comment.as_dict() for comment in comments]})
     
     form = PostForm()
     comment_form = CommentForm()
     
-    return render(request, 'thecavins/stream.html', {'form':form, 'comment_form':comment_form, 'active_page':'stream',
-                                                   'stream_id': stream.id, 'posts_to_display':posts_to_display})
+    return render_api_or_html_response(request, 'thecavins/stream.html',
+                                       {'stream_id': stream.id, 'posts_to_display':posts_to_display},
+                                       {'form':form, 'comment_form':comment_form, 'active_page':'stream'})
 
 @require_http_methods(["POST"])
 def post_to_stream(request,stream_id) :
@@ -154,13 +178,27 @@ def post_to_stream(request,stream_id) :
     stream = Stream.objects.get(pk=stream_id)
 
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        
+        # May upload an image directly from the phone
+        submitted_image = None
+        image_form = ImageUploadForm(request.POST, request.FILES)
+        if image_form.is_valid() :
+            print "YAY"
+            new_image = Image()
+            new_image.created_by = request.user
+            new_image.original = image_form.cleaned_data['image']
+            new_image.cropped = image_form.cleaned_data['image']
+            new_image.save()
+            submitted_image = new_image
+       
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid() :
             
             images = []
             image_ids = [int(id) for id in form.cleaned_data['image_ids'].split(',') if id]
             if image_ids : images = Image.objects.filter(pk__in=image_ids)
-            
+            if submitted_image : images.append(submitted_image)
+
             #Make sure there is text OR an image.  Doesn't need to be both
             if form.cleaned_data['text'] or len(images) : 
                 post = Post()
@@ -240,8 +278,28 @@ def comment_to_post(request,post_id) :
             
     return redirect(target_url)
             
-    
+
+
+# -------------------------------------------------------------------
+# API Specific Endpoints
+#
+
+@login_required
+def hello(request):
+    user = request.user
+    user.get_profile().save()  # Update last_active
+    return HttpResponse(json.dumps({'username':user.username,
+                                    'first_name':user.first_name,
+                                    'last_name':user.last_name}))
+
+#   
+# END API Specific Endpoints
+#----------------------------------------------------------------------
+
+
+#----------------------------------------------------------------------   
 # IMAGE HANDLING
+#
 class ImageUploadForm(forms.Form):
     image = forms.ImageField()
 
@@ -309,4 +367,6 @@ def image_crop(request, image_id):
     crop_and_save(image, image_data, cropped_image_file_name, crop_rect, target_size)
     
     return  HttpResponse('{"cropped_image":{"url":"%s","id":%d}}' % (image.cropped.url, image.id))
-   
+#   
+# END Image Handling
+#--------------------------------------------------------------------
