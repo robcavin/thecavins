@@ -11,6 +11,13 @@ body {
     overflow-y:scroll;*/
 }
 
+@media (max-width: 767px) {
+  body {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+}
+
 .navbar p {
     display:inline-block;
 }
@@ -56,6 +63,13 @@ body {
 .post {
     font-size : 15px;
 }
+
+.post hr {
+    height:2px;
+    background-color:#CCCCCC;
+    border-color:#CCCCCC;
+}
+
 .post .comment {
     font-size: 13px;
     background-color:#FCFCFC;
@@ -85,6 +99,12 @@ form table td {
     border-radius:5px;
 }
 
+@media (max-width: 767px) {
+    #main_content_pane {
+        padding-top:0px;
+    }
+}
+
 #bg {
     position: fixed;
     top: 0;
@@ -97,4 +117,19 @@ form table td {
 #bg img {
     width: 100%;
     max-width: 100%;
+}
+
+@media (max-width: 767px) {
+    .image-span {
+        width:60px;
+        float:left;
+        margin-right:5px;
+        margin-bottom:5px;
+    }
+    
+    .desc-span {
+        display:inline-block;
+        float:left;
+        width:250px;
+    }
 }
