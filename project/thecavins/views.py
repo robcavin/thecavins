@@ -1,5 +1,6 @@
 # Create your views here.
 from django.shortcuts import render, redirect, get_object_or_404
+from django.middleware.csrf import get_token
 from django import forms
 from django.http import HttpResponse
 from django.conf import settings
@@ -17,7 +18,6 @@ from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
 from django.template.response import TemplateResponse
 import json
-
 
 # XXX - This is sloppy recursion.  Needs better thought
 #def objify_data_w_models(data,verbose) :
@@ -54,7 +54,7 @@ def render_api_or_html_response (request, template_name, data, context) :
         accepted_types = [a.split(';')[0] for a in request.META['HTTP_ACCEPT'].split(',')]        
 
     # Prefer JSON response
-    if accepted_types and 'application/json' in accepted_types :        
+    if accepted_types and 'application/json' in accepted_types :
         return HttpResponse(json.dumps(data))
     
     # Default to HTML response
@@ -69,7 +69,9 @@ def login(request):
     if isinstance(response,TemplateResponse) :
         return render_api_or_html_response(request,
                                            response.template_name,
-                                           {'login_required':True},
+                                           {'login_required':True,
+                                            'csrfmiddlewaretoken':get_token(request)  # Has the side effect of setting the csrf cookie
+                                            },
                                            response.context_data)
     
     else : return response
@@ -283,14 +285,17 @@ def comment_to_post(request,post_id) :
 # -------------------------------------------------------------------
 # API Specific Endpoints
 #
+from django.views.decorators.csrf import csrf_protect
 
+@csrf_protect
 @login_required
 def hello(request):
     user = request.user
     user.get_profile().save()  # Update last_active
     return HttpResponse(json.dumps({'username':user.username,
                                     'first_name':user.first_name,
-                                    'last_name':user.last_name}))
+                                    'last_name':user.last_name,
+                                    }))
 
 #   
 # END API Specific Endpoints
