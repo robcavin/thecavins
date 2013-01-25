@@ -18,34 +18,17 @@ from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
 from django.template.response import TemplateResponse
 import json
+from django.template.defaultfilters import register
+from datetime import datetime
+from django.utils.timezone import utc
 
-# XXX - This is sloppy recursion.  Needs better thought
-#def objify_data_w_models(data,verbose) :
-#    if isinstance(data,dict) :
-#        return_dict = {}
-#        for (key, value) in data.iteritems() :
-#            if isinstance(value,Model) :
-#                return_dict.update({key:value.to_dict(verbose)})
-#            else :
-#                return_dict.update({key:objify_data_w_models(value)})
-#
-#        return return_dict
-#    
-#    elif isinstance(data,list) :
-#        return_array = []
-#        
-#        for value in data :
-#            if isinstance(value,Model) :
-#                return_array.append(value.to_dict(verbose))
-#            else :
-#                return_array.append(objify_data_w_models(value))
-#    
-#    elif isinstance(data,Model) :
-#        return data.to_dict(verbose)
-#    
-#    else :
-#        return data
-
+@register.filter
+def iso_to_date(value):
+    (time,tz) = value.split('+')
+    date = datetime.strptime(time, "%Y-%m-%dT%H:%M:%S")
+    date = date.replace(tzinfo=utc)
+    print date
+    return date
 
 def render_api_or_html_response (request, template_name, data, context) :
     accepted_types = None
