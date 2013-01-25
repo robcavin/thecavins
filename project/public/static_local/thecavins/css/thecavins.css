@@ -99,12 +99,6 @@ form table td {
     border-radius:5px;
 }
 
-@media (max-width: 767px) {
-    #main_content_pane {
-        padding-top:0px;
-    }
-}
-
 #bg {
     position: fixed;
     top: 0;
@@ -120,6 +114,15 @@ form table td {
 }
 
 @media (max-width: 767px) {
+
+    .navbar-fixed-top {
+        margin-left:0px;
+        margin-right:0px;
+    }
+    
+    #main_content_pane {
+        padding-top:0px;
+    }
     .image-span {
         width:60px;
         float:left;
