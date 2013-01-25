@@ -27,7 +27,6 @@ def iso_to_date(value):
     (time,tz) = value.split('+')
     date = datetime.strptime(time, "%Y-%m-%dT%H:%M:%S")
     date = date.replace(tzinfo=utc)
-    print date
     return date
 
 def render_api_or_html_response (request, template_name, data, context) :

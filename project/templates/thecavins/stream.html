@@ -26,7 +26,7 @@
        <div class="post">
       <hr id="post-{{ post.id }}">
       <div class="row">
-        <div class="span1 image-span"><img class="profile_image" src="{{ post.created_by.image.cropped.url }}"/></div>
+        <div class="span1 image-span"><img class="profile_image" src="{{ post.created_by.get_profile.image.cropped.url }}"></div>
         <div class="span9 desc-span">
         
             <p class="text-info">{{ post.created_by.get_profile.nickname }} - <small>{{ post.created_at|iso_to_date|date:"h:i A D, M d" }}</small></p>
